@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>坪山区电动车违法抓拍RFID设备点位</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* ===== 1. 全局样式 ===== */
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+            overflow: hidden; /* 防止页面出现滚动条 */
+        }
+
+        /* ===== 2. 标题样式 ===== */
+        #header {
+            /* 定位：悬浮在页面顶部中央 */
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(1.3) skew(-5deg); /* 居中 + 拉伸1.3倍 + 向左倾斜5度 */
+            z-index: 1000; /* 确保显示在地图上方 */
+            
+            /* 文字样式 */
+            color: #18464d; /* 深蓝绿色文字 */
+            font-size: 22px;
+            font-weight: 650;
+            letter-spacing: 1px;
+            text-align: center;
+            white-space: nowrap; /* 不换行 */
+            
+            /* 【透明度控制点】只需修改下面这个值即可调整透明度 */
+            /* 值范围：0.0 (完全透明) ~ 1.0 (完全不透明)，建议使用 0.7~1.0 */
+            opacity: 0.83; /* 默认95%不透明度，如需调整请修改此数值 */
+            
+            /* 文字阴影：确保在任何地图背景下都能看清文字 */
+            text-shadow: 2px 2px 4px rgba(84, 84, 84, 0.9);
+            
+            /* 背景和边框：极简的无框设计，只有轻微内边距 */
+            padding: 10px 15px;
+            background-color: transparent; /* 完全透明背景 */
+            border: none; /* 无边框 */
+            box-shadow: none; /* 无阴影 */
+        }
+
+        /* ===== 3. 地图容器样式 ===== */
+        #map {
+            height: 100vh; /* 全屏高度 */
+            width: 100%;   /* 全屏宽度 */
+        }
+
+        /* ===== 4. 响应式设计：小屏幕设备调整 ===== */
+        @media (max-width: 768px) {
+            #header {
+                font-size: 18px; /* 在小屏幕上稍微缩小字体 */
+                top: 15px;       /* 离顶部稍近一些 */
+                padding: 8px 12px; /* 减少内边距 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 悬浮标题：无框、拉长、倾斜设计 -->
+    <div id="header">
+        坪山区电动车违法抓拍RFID设备点位
+    </div>
+
+    <!-- 地图显示容器 -->
+    <div id="map"></div>
+
+    <script>
+        // ==================== 配置区域 ====================
+        // 您可以根据需要修改以下配置值
+        
+        // 【配置1】初始地图中心点和缩放级别
+        var mapCenter = [34.27, 108.95]; // 经纬度：[纬度, 经度]
+        var mapZoom = 5;                 // 缩放级别：1-18，数字越大越详细
+        
+        // 【配置2】标记点样式（您之前自定义的粉色系）
+        var markerStyle = {
+            radius: 8,           // 点的大小（像素）
+            fillColor: "#ff00aa", // 填充色：亮粉色
+            color: "#f595bf",    // 边框色：浅粉色
+            weight: 4,           // 边框粗细
+            opacity: 1,          // 边框不透明度（1=完全不透明）
+            fillOpacity: 0.8     // 填充不透明度（0.8=80%不透明）
+        };
+        
+        // 【配置3】高德地图瓦片配置
+        var tileLayerConfig = {
+            url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+            attribution: '© 高德地图',
+            subdomains: '1234',
+            maxZoom: 18  // 允许的最大缩放级别
+        };
+
+        // ==================== 地图功能代码 ====================
+        // 以下部分通常不需要修改，除非您需要高级定制
+        
+        // 1. 初始化地图
+        var map = L.map('map').setView(mapCenter, mapZoom);
+        
+        // 2. 添加高德地图底图
+        L.tileLayer(tileLayerConfig.url, {
+            attribution: tileLayerConfig.attribution,
+            subdomains: tileLayerConfig.subdomains,
+            maxZoom: tileLayerConfig.maxZoom
+        }).addTo(map);
+
+        // 3. 加载并显示您的点位数据
+        fetch('./data.geojson')
+            .then(response => {
+                if (!response.ok) throw new Error('文件加载失败，请检查data.geojson是否存在');
+                return response.json();
+            })
+            .then(data => {
+                // 将GeoJSON数据转换为地图上的标记点
+                var geoJsonLayer = L.geoJSON(data, {
+                    // 定义每个点在地图上的显示样式
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, markerStyle);
+                    },
+                    // 为每个点添加点击弹窗功能
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && Object.keys(feature.properties).length > 0) {
+                            // 构建弹窗内容：显示该点的所有属性信息
+                            var popupContent = "<div style='line-height:1.6;font-size:14px;max-width:300px;'>";
+                            for (var key in feature.properties) {
+                                popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
+                            }
+                            popupContent += "</div>";
+                            layer.bindPopup(popupContent);
+                        }
+                    }
+                }).addTo(map);
+
+                // 4. 自动调整地图视野，使所有点都显示在屏幕内
+                if (geoJsonLayer.getLayers().length > 0) {
+                    map.fitBounds(geoJsonLayer.getBounds());
+                    console.log('地图加载成功！共加载 ' + geoJsonLayer.getLayers().length + ' 个点位。');
+                } else {
+                    console.warn('数据文件已加载，但未发现有效的点位数据。');
+                }
+            })
+            .catch(error => {
+                // 错误处理：如果加载失败，在控制台显示详细错误
+                console.error('地图数据加载失败:', error);
+                alert('地图数据加载失败，请按F12打开控制台查看详细错误信息。');
+            });
+    </script>
+</body>
+</html>
