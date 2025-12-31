@@ -2,66 +2,129 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <!-- 页面标题 -->
     <title>坪山区电动车违法抓拍RFID设备点位</title>
+    
+    <!-- 引入Leaflet地图库 -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- 移动端视口配置：禁止缩放以确保地图体验 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <style>
         /* ===== 1. 全局样式 ===== */
         body {
-            margin: 0;
-            font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-            overflow: hidden; /* 防止页面出现滚动条 */
+            margin: 0;                       /* 移除默认边距 */
+            font-family: "Microsoft YaHei", "Segoe UI", sans-serif;  /* 中文字体优先 */
+            overflow: hidden;                /* 隐藏滚动条，实现全屏效果 */
+            -webkit-tap-highlight-color: transparent; /* 移除移动端点击时的灰色高亮 */
+            touch-action: manipulation;      /* 改善触摸响应，避免意外缩放 */
         }
 
         /* ===== 2. 标题样式 ===== */
         #header {
-            /* 定位：悬浮在页面顶部中央 */
+            /* 定位：固定在页面顶部中央 */
             position: absolute;
             top: 20px;
             left: 50%;
-            transform: translateX(-50%) scaleX(1.3) skew(-5deg); /* 居中 + 拉伸1.3倍 + 向左倾斜5度 */
-            z-index: 1000; /* 确保显示在地图上方 */
+            /* 变换效果：水平居中 + X轴拉伸1.3倍 + 向左倾斜5度 */
+            transform: translateX(-50%) scaleX(1.3) skew(-5deg);
+            z-index: 1000;                  /* 确保标题显示在地图上方 */
             
             /* 文字样式 */
-            color: #18464d; /* 深蓝绿色文字 */
+            color: #18464d;                 /* 深蓝绿色 */
             font-size: 22px;
-            font-weight: 650;
-            letter-spacing: 1px;
+            font-weight: 650;               /* 加粗显示 */
+            letter-spacing: 1px;            /* 字间距 */
             text-align: center;
-            white-space: nowrap; /* 不换行 */
+            white-space: nowrap;            /* 防止标题换行 */
             
-            /* 【透明度控制点】只需修改下面这个值即可调整透明度 */
-            /* 值范围：0.0 (完全透明) ~ 1.0 (完全不透明)，建议使用 0.7~1.0 */
-            opacity: 0.83; /* 默认95%不透明度，如需调整请修改此数值 */
+            /* 透明度设置：0.0(完全透明) ~ 1.0(完全不透明) */
+            opacity: 0.83;                  /* 83%不透明度 */
             
             /* 文字阴影：确保在任何地图背景下都能看清文字 */
             text-shadow: 2px 2px 4px rgba(84, 84, 84, 0.9);
             
-            /* 背景和边框：极简的无框设计，只有轻微内边距 */
-            padding: 10px 15px;
-            background-color: transparent; /* 完全透明背景 */
-            border: none; /* 无边框 */
-            box-shadow: none; /* 无阴影 */
+            /* 背景和边框：无框设计 */
+            padding: 10px 15px;             /* 内边距 */
+            background-color: transparent;  /* 透明背景 */
+            border: none;                   /* 无边框 */
+            box-shadow: none;               /* 无阴影 */
         }
 
         /* ===== 3. 地图容器样式 ===== */
         #map {
-            height: 100vh; /* 全屏高度 */
-            width: 100%;   /* 全屏宽度 */
+            height: 100vh;  /* 全屏高度：100%视口高度 */
+            width: 100%;    /* 全屏宽度 */
         }
 
-        /* ===== 4. 响应式设计：小屏幕设备调整 ===== */
+        /* ===== 4. 优化移动端弹窗样式 ===== */
+        .leaflet-popup-content {
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 60vh;               /* 限制弹窗最大高度为视口的60% */
+            overflow-y: auto;               /* 内容过多时可垂直滚动 */
+            -webkit-overflow-scrolling: touch; /* 移动端平滑滚动效果 */
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;            /* 圆角设计，更美观 */
+            max-width: 85vw;                /* 移动端适配：最大宽度为视口的85% */
+        }
+        
+        .leaflet-popup-tip {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ===== 5. 移动设备专属样式 ===== */
         @media (max-width: 768px) {
+            /* 屏幕宽度小于768px时应用以下样式 */
             #header {
-                font-size: 18px; /* 在小屏幕上稍微缩小字体 */
-                top: 15px;       /* 离顶部稍近一些 */
-                padding: 8px 12px; /* 减少内边距 */
+                font-size: 18px;            /* 移动端字体稍小 */
+                top: 15px;                  /* 离顶部稍近 */
+                padding: 8px 12px;          /* 减少内边距 */
+                transform: translateX(-50%) scaleX(1.2) skew(-5deg); /* 移动端减少拉伸效果 */
+            }
+            
+            /* 移动端增大弹窗字体 */
+            .leaflet-popup-content {
+                font-size: 16px;
+            }
+            
+            /* 移动端增大关闭按钮，便于触摸操作 */
+            .leaflet-popup-close-button {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 24px !important;
+                line-height: 30px !important;
+            }
+            
+            /* 移动端增大点位标记的点击区域 */
+            .marker-touch-layer {
+                cursor: pointer !important; /* 确保鼠标指针变为手型 */
+            }
+        }
+        
+        /* ===== 6. 触摸设备特定优化 ===== */
+        /* 仅针对触摸设备（无悬停功能、粗糙指针）的样式 */
+        @media (hover: none) and (pointer: coarse) {
+            /* 为触摸设备进一步优化弹窗 */
+            .leaflet-popup-content {
+                font-size: 16px;
+                padding: 12px;              /* 增加内边距 */
+            }
+            
+            /* 触摸设备上的标记添加阴影效果，增加立体感和触感 */
+            .touch-friendly-marker {
+                filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
             }
         }
     </style>
 </head>
 <body>
-    <!-- 悬浮标题：无框、拉长、倾斜设计 -->
+    <!-- 悬浮标题：无框、拉伸、倾斜设计 -->
     <div id="header">
         坪山区电动车违法抓拍RFID设备点位
     </div>
@@ -71,83 +134,219 @@
 
     <script>
         // ==================== 配置区域 ====================
-        // 您可以根据需要修改以下配置值
+        // 开发者可以根据需要修改以下配置值
         
         // 【配置1】初始地图中心点和缩放级别
         var mapCenter = [34.27, 108.95]; // 经纬度：[纬度, 经度]
         var mapZoom = 5;                 // 缩放级别：1-18，数字越大越详细
         
-        // 【配置2】标记点样式（您之前自定义的粉色系）
-        var markerStyle = {
-            radius: 8,           // 点的大小（像素）
+        // 【配置2】设备检测：判断是否为移动设备
+        // 方法1：检查用户代理字符串是否包含移动设备关键词
+        var isMobileByUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // 方法2：检查屏幕宽度是否小于等于768px（常见移动设备宽度）
+        var isMobileByWidth = window.innerWidth <= 768;
+        // 综合判断：满足任一条件即认为是移动设备
+        var isMobile = isMobileByUA || isMobileByWidth;
+        
+        // 在控制台输出设备检测结果，便于调试
+        console.log("设备检测结果: " + (isMobile ? "移动设备" : "桌面设备"));
+        console.log("屏幕宽度: " + window.innerWidth + "px");
+        
+        // 【配置3】桌面端标记点样式
+        var desktopMarkerStyle = {
+            radius: 8,           // 桌面端点的大小（像素）
             fillColor: "#ff00aa", // 填充色：亮粉色
             color: "#f595bf",    // 边框色：浅粉色
             weight: 4,           // 边框粗细
             opacity: 1,          // 边框不透明度（1=完全不透明）
-            fillOpacity: 0.8     // 填充不透明度（0.8=80%不透明）
+            fillOpacity: 0.8,    // 填充不透明度（0.8=80%不透明）
+            className: 'touch-friendly-marker' // CSS类名，用于添加特殊样式
         };
         
-        // 【配置3】高德地图瓦片配置
+        // 【配置4】移动端标记点样式（尺寸更大）
+        var mobileMarkerStyle = {
+            radius: 14,          // 移动端点的大小（像素）- 比桌面端大75%
+            fillColor: "#ff00aa",
+            color: "#f595bf",
+            weight: 4,
+            opacity: 1,
+            fillOpacity: 0.8,
+            className: 'touch-friendly-marker'
+        };
+        
+        // 【配置5】根据设备类型选择样式
+        var markerStyle = isMobile ? mobileMarkerStyle : desktopMarkerStyle;
+        
+        // 【配置6】桌面端透明触摸层样式
+        var desktopTouchLayerStyle = {
+            radius: 20,           // 桌面端触摸层大小（比视觉标记大）
+            fillColor: "transparent",  // 完全透明填充
+            color: "transparent",      // 完全透明边框
+            weight: 0,            // 边框粗细为0
+            opacity: 0,           // 完全透明
+            fillOpacity: 0,       // 完全透明
+            className: 'marker-touch-layer' // CSS类名
+        };
+        
+        // 【配置7】移动端透明触摸层样式（尺寸更大）
+        var mobileTouchLayerStyle = {
+            radius: 32,           // 移动端触摸层大小 - 比桌面端大60%
+            fillColor: "transparent",
+            color: "transparent",
+            weight: 0,
+            opacity: 0,
+            fillOpacity: 0,
+            className: 'marker-touch-layer'
+        };
+        
+        // 【配置8】根据设备类型选择触摸层样式
+        var touchLayerStyle = isMobile ? mobileTouchLayerStyle : desktopTouchLayerStyle;
+        
+        // 【配置9】高德地图瓦片配置
         var tileLayerConfig = {
             url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
-            attribution: '© 高德地图',
-            subdomains: '1234',
-            maxZoom: 18  // 允许的最大缩放级别
+            attribution: '© 高德地图',  // 版权声明
+            subdomains: '1234',        // 子域名，用于负载均衡
+            maxZoom: 18                // 允许的最大缩放级别
         };
 
         // ==================== 地图功能代码 ====================
-        // 以下部分通常不需要修改，除非您需要高级定制
+        // 以下为地图核心功能，通常不需要修改
         
         // 1. 初始化地图
+        // L.map()创建地图实例，setView()设置初始中心点和缩放级别
         var map = L.map('map').setView(mapCenter, mapZoom);
         
         // 2. 添加高德地图底图
+        // L.tileLayer()创建瓦片图层，addTo()添加到地图
         L.tileLayer(tileLayerConfig.url, {
             attribution: tileLayerConfig.attribution,
             subdomains: tileLayerConfig.subdomains,
             maxZoom: tileLayerConfig.maxZoom
         }).addTo(map);
 
-        // 3. 加载并显示您的点位数据
+        // 3. 加载并显示点位数据
+        // fetch()从服务器获取GeoJSON数据文件
         fetch('./data.geojson')
             .then(response => {
+                // 检查响应是否成功
                 if (!response.ok) throw new Error('文件加载失败，请检查data.geojson是否存在');
-                return response.json();
+                return response.json();  // 解析JSON数据
             })
             .then(data => {
-                // 将GeoJSON数据转换为地图上的标记点
-                var geoJsonLayer = L.geoJSON(data, {
-                    // 定义每个点在地图上的显示样式
-                    pointToLayer: function (feature, latlng) {
-                        return L.circleMarker(latlng, markerStyle);
-                    },
-                    // 为每个点添加点击弹窗功能
-                    onEachFeature: function (feature, layer) {
+                // 创建图层组，用于统一管理所有标记
+                var markersLayer = L.layerGroup().addTo(map);
+                
+                // 统计点位数量
+                var pointCount = 0;
+                
+                // 遍历GeoJSON数据中的所有要素
+                data.features.forEach(feature => {
+                    // 只处理点类型的地理要素
+                    if (feature.geometry && feature.geometry.type === "Point") {
+                        pointCount++;  // 计数增加
+                        
+                        // 提取坐标：[经度, 纬度] -> 转换为[纬度, 经度]
+                        var latlng = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+                        
+                        // 创建视觉标记层（用户看到的粉色点）
+                        var visualMarker = L.circleMarker(latlng, markerStyle);
+                        
+                        // 创建触摸层（透明但更大的点击区域）
+                        var touchMarker = L.circleMarker(latlng, touchLayerStyle);
+                        
+                        // 检查是否有属性数据需要显示
                         if (feature.properties && Object.keys(feature.properties).length > 0) {
-                            // 构建弹窗内容：显示该点的所有属性信息
+                            // 构建弹窗内容：显示所有属性信息
                             var popupContent = "<div style='line-height:1.6;font-size:14px;max-width:300px;'>";
+                            // 遍历所有属性键值对
                             for (var key in feature.properties) {
                                 popupContent += "<b>" + key + ":</b> " + feature.properties[key] + "<br>";
                             }
                             popupContent += "</div>";
-                            layer.bindPopup(popupContent);
+                            
+                            // 为视觉标记层绑定弹窗
+                            visualMarker.bindPopup(popupContent);
+                            // 为触摸层也绑定相同的弹窗
+                            touchMarker.bindPopup(popupContent);
+                            
+                            // 为触摸层添加点击事件
+                            touchMarker.on('click', function(e) {
+                                // 阻止事件冒泡，避免多次触发
+                                L.DomEvent.stopPropagation(e);
+                                // 打开弹窗
+                                this.openPopup();
+                            });
                         }
+                        
+                        // 将两个图层添加到地图的图层组
+                        visualMarker.addTo(markersLayer);
+                        touchMarker.addTo(markersLayer);
                     }
-                }).addTo(map);
-
+                });
+                
                 // 4. 自动调整地图视野，使所有点都显示在屏幕内
-                if (geoJsonLayer.getLayers().length > 0) {
-                    map.fitBounds(geoJsonLayer.getBounds());
-                    console.log('地图加载成功！共加载 ' + geoJsonLayer.getLayers().length + ' 个点位。');
+                if (pointCount > 0) {
+                    // 创建包含所有点位的边界框
+                    var bounds = L.latLngBounds(data.features.map(feature => {
+                        if (feature.geometry && feature.geometry.type === "Point") {
+                            return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+                        }
+                        return null;
+                    }).filter(latlng => latlng !== null));  // 过滤掉空值
+                    
+                    // 调整地图视野以显示所有点位，并添加内边距
+                    map.fitBounds(bounds, {
+                        padding: [50, 50],  // 增加50像素的内边距，点位不会紧贴边缘
+                        maxZoom: isMobile ? 16 : 18  // 移动端限制最大缩放级别，避免过度放大
+                    });
+                    
+                    // 控制台输出加载成功信息
+                    console.log(`地图加载成功！共加载 ${pointCount} 个点位。`);
+                    console.log(`设备类型: ${isMobile ? '移动端' : '桌面端'}`);
+                    console.log(`点位视觉大小: ${markerStyle.radius}px, 触摸区域大小: ${touchLayerStyle.radius}px`);
                 } else {
                     console.warn('数据文件已加载，但未发现有效的点位数据。');
                 }
+                
+                // 5. 添加调试信息（可选，生产环境可以移除）
+                // 如果URL中包含debug参数，则显示调试面板
+                if (window.location.href.indexOf('debug') !== -1) {
+                    var debugInfo = L.control({position: 'bottomleft'});
+                    debugInfo.onAdd = function(map) {
+                        this._div = L.DomUtil.create('div', 'debug-info');
+                        this.update();
+                        return this._div;
+                    };
+                    debugInfo.update = function() {
+                        this._div.innerHTML = `<div style="background:white;padding:5px;border-radius:3px;font-size:12px;">
+                            <b>设备:</b> ${isMobile ? '移动端' : '桌面端'}<br>
+                            <b>点位:</b> ${pointCount}个<br>
+                            <b>视觉大小:</b> ${markerStyle.radius}px<br>
+                            <b>触摸区域:</b> ${touchLayerStyle.radius}px<br>
+                            <b>屏幕宽度:</b> ${window.innerWidth}px
+                        </div>`;
+                    };
+                    debugInfo.addTo(map);
+                }
             })
             .catch(error => {
-                // 错误处理：如果加载失败，在控制台显示详细错误
+                // 错误处理：如果加载失败，在控制台显示详细错误并提示用户
                 console.error('地图数据加载失败:', error);
                 alert('地图数据加载失败，请按F12打开控制台查看详细错误信息。');
             });
+            
+        // 6. 监听窗口大小变化，在移动设备横竖屏切换时重新计算
+        var resizeTimer;  // 防抖计时器
+        window.addEventListener('resize', function() {
+            // 清除之前的计时器
+            clearTimeout(resizeTimer);
+            // 设置新的计时器，延迟执行以避免频繁触发
+            resizeTimer = setTimeout(function() {
+                console.log('窗口大小改变，当前宽度: ' + window.innerWidth + 'px');
+                // 注意：这里只是记录变化，实际应用中可能需要重新调整视野或重新检测设备类型
+            }, 250);  // 250毫秒延迟
+        });
     </script>
 </body>
 </html>
