@@ -59,7 +59,37 @@
             width: 100%;    /* 全屏宽度 */
         }
 
-        /* ===== 4. 优化移动端弹窗样式 ===== */
+        /* ===== 4. 提示文字样式（左下角）===== */
+        #instruction {
+            /* 定位：固定在页面左下角，距离底部和左边有一定间距 */
+            position: absolute;
+            bottom: 25px;                   /* 距离底部25像素 */
+            left: 20px;                     /* 距离左边20像素 */
+            z-index: 1000;                  /* 确保显示在地图上方 */
+            
+            /* 文字样式 */
+            color: #000000;                 /* 纯黑色字体 */
+            font-size: 14px;                /* 适中字体大小 */
+            font-weight: bold;              /* 加粗显示 */
+            opacity: 0.85;                  /* 85%不透明度 */
+            
+            /* 无背景框设计 */
+            background-color: transparent;  /* 透明背景 */
+            border: none;                   /* 无边框 */
+            padding: 0;                     /* 无内边距 */
+            margin: 0;                      /* 无外边距 */
+            
+            /* 文字阴影：确保在浅色地图背景下也能看清文字 */
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+            
+            /* 防止文字被选中 */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* ===== 5. 优化移动端弹窗样式 ===== */
         .leaflet-popup-content {
             font-size: 14px;
             line-height: 1.5;
@@ -78,7 +108,7 @@
             height: 16px;
         }
 
-        /* ===== 5. 移动设备专属样式 ===== */
+        /* ===== 6. 移动设备专属样式 ===== */
         @media (max-width: 768px) {
             /* 屏幕宽度小于768px时应用以下样式 */
             #header {
@@ -86,6 +116,13 @@
                 top: 15px;                  /* 离顶部稍近 */
                 padding: 8px 12px;          /* 减少内边距 */
                 transform: translateX(-50%) scaleX(1.2) skew(-5deg); /* 移动端减少拉伸效果 */
+            }
+            
+            /* 移动端调整提示文字大小和位置 */
+            #instruction {
+                font-size: 13px;            /* 移动端稍小字体 */
+                bottom: 20px;               /* 距离底部稍近 */
+                left: 15px;                 /* 距离左边稍近 */
             }
             
             /* 移动端增大弹窗字体 */
@@ -107,7 +144,7 @@
             }
         }
         
-        /* ===== 6. 触摸设备特定优化 ===== */
+        /* ===== 7. 触摸设备特定优化 ===== */
         /* 仅针对触摸设备（无悬停功能、粗糙指针）的样式 */
         @media (hover: none) and (pointer: coarse) {
             /* 为触摸设备进一步优化弹窗 */
@@ -120,6 +157,27 @@
             .touch-friendly-marker {
                 filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
             }
+            
+            /* 触摸设备上提示文字稍大 */
+            #instruction {
+                font-size: 14px;
+            }
+        }
+        
+        /* ===== 8. 小屏幕手机特殊优化 ===== */
+        @media (max-width: 480px) {
+            /* 针对小屏幕手机进一步优化 */
+            #header {
+                font-size: 16px;            /* 进一步减小标题字体 */
+                top: 10px;                  /* 更靠近顶部 */
+                padding: 6px 10px;          /* 更小内边距 */
+            }
+            
+            #instruction {
+                font-size: 12px;            /* 小屏幕提示文字更小 */
+                bottom: 15px;               /* 更靠近底部 */
+                left: 10px;                 /* 更靠近左边 */
+            }
         }
     </style>
 </head>
@@ -127,6 +185,11 @@
     <!-- 悬浮标题：无框、拉伸、倾斜设计 -->
     <div id="header">
         坪山区电动车违法抓拍RFID设备点位
+    </div>
+    
+    <!-- 操作提示文字：左下角无框提示 -->
+    <div id="instruction">
+        点击标色点位可查看点位信息
     </div>
 
     <!-- 地图显示容器 -->
@@ -346,6 +409,16 @@
                 console.log('窗口大小改变，当前宽度: ' + window.innerWidth + 'px');
                 // 注意：这里只是记录变化，实际应用中可能需要重新调整视野或重新检测设备类型
             }, 250);  // 250毫秒延迟
+        });
+        
+        // 7. 确保提示文字在Leaflet控件之上
+        // 获取提示文字元素并调整其z-index，确保在地图控件上方
+        window.addEventListener('load', function() {
+            var instructionElement = document.getElementById('instruction');
+            if (instructionElement) {
+                // 设置较高的z-index值，确保在Leaflet控件之上
+                instructionElement.style.zIndex = '1001';
+            }
         });
     </script>
 </body>
