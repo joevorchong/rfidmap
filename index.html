@@ -116,7 +116,7 @@
             transition: all 0.2s ease;      /* 添加过渡效果 */
             
             /* 添加阴影效果：轻微阴影，使图标与地图背景区分开 */
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             
             /* 确保图标保持原始比例 */
             object-fit: contain !important;
@@ -126,7 +126,7 @@
         @media (hover: hover) {
             .custom-marker-icon:hover {
                 opacity: 0.9 !important;      /* 悬停时完全不透明 */
-                filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4)); /* 悬停时阴影加深 */
+                filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3)); /* 悬停时阴影加深 */
                 transform: scale(1.05);     /* 悬停时轻微放大 */
             }
         }
@@ -565,4 +565,5 @@
     </script>
 </body>
 </html>
+
 
