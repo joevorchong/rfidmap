@@ -22,35 +22,46 @@
             touch-action: manipulation;      /* 改善触摸响应，避免意外缩放 */
         }
 
-        /* ===== 2. 标题样式 ===== */
+        /* ===== 2. 扁平化风格标题样式 ===== */
         #header {
             /* 定位：固定在页面顶部中央 */
             position: absolute;
-            top: 20px;
+            top: 25px;                       /* 距离顶部稍远，留出呼吸空间 */
             left: 50%;
-            /* 变换效果：水平居中 + X轴拉伸1.3倍 + 向左倾斜5度 */
-            transform: translateX(-50%) scaleX(1.3) skew(-5deg);
+            transform: translateX(-50%);     /* 水平居中，移除之前的拉伸和倾斜 */
             z-index: 1000;                  /* 确保标题显示在地图上方 */
             
-            /* 文字样式 */
-            color: #18464d;                 /* 深蓝绿色 */
-            font-size: 22px;
-            font-weight: 650;               /* 加粗显示 */
-            letter-spacing: 1px;            /* 字间距 */
+            /* 扁平化设计元素 */
+            background-color: rgba(24, 70, 77, 0.9);  /* 深蓝绿色背景，90%不透明度 */
+            color: #ffffff;                  /* 白色文字，提高对比度 */
+            font-size: 20px;                /* 适中的字体大小 */
+            font-weight: 500;                /* 中等字重，现代感更强 */
+            letter-spacing: 1.5px;          /* 增加字间距，提升可读性 */
             text-align: center;
             white-space: nowrap;            /* 防止标题换行 */
             
-            /* 透明度设置：0.0(完全透明) ~ 1.0(完全不透明) */
-            opacity: 0.83;                  /* 83%不透明度 */
+            /* 扁平化圆角和阴影 */
+            border-radius: 12px;            /* 圆角设计，现代感 */
+            padding: 14px 28px;             /* 充足的内边距，提升点击区域 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 轻微阴影，增加层次感 */
             
-            /* 文字阴影：确保在任何地图背景下都能看清文字 */
-            text-shadow: 2px 2px 4px rgba(84, 84, 84, 0.9);
+            /* 扁平化边框 */
+            border: none;                   /* 无边框设计，更简洁 */
             
-            /* 背景和边框：无框设计 */
-            padding: 10px 15px;             /* 内边距 */
-            background-color: transparent;  /* 透明背景 */
-            border: none;                   /* 无边框 */
-            box-shadow: none;               /* 无阴影 */
+            /* 文字效果 */
+            text-shadow: none;              /* 移除文字阴影，扁平化风格 */
+            
+            /* 悬停效果（桌面端） */
+            transition: all 0.3s ease;      /* 平滑过渡效果 */
+        }
+
+        /* 桌面端悬停效果：轻微上浮和阴影加深 */
+        @media (hover: hover) {
+            #header:hover {
+                transform: translateX(-50%) translateY(-2px); /* 轻微上浮效果 */
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);    /* 加深阴影 */
+                background-color: rgba(24, 70, 77, 0.95);     /* 加深背景色 */
+            }
         }
 
         /* ===== 3. 地图容器样式 ===== */
@@ -59,7 +70,7 @@
             width: 100%;    /* 全屏宽度 */
         }
 
-        /* ===== 4. 提示文字样式（左下角）===== */
+        /* ===== 4. 提示文字样式（左下角）- 移除加粗效果 ===== */
         #instruction {
             /* 定位：固定在页面左下角，距离底部和左边有一定间距 */
             position: absolute;
@@ -70,23 +81,32 @@
             /* 文字样式 */
             color: #000000;                 /* 纯黑色字体 */
             font-size: 14px;                /* 适中字体大小 */
-            font-weight: bold;              /* 加粗显示 */
+            font-weight: normal;            /* 移除加粗效果，改为普通字重 */
             opacity: 0.85;                  /* 85%不透明度 */
             
-            /* 无背景框设计 */
-            background-color: transparent;  /* 透明背景 */
-            border: none;                   /* 无边框 */
-            padding: 0;                     /* 无内边距 */
-            margin: 0;                      /* 无外边距 */
+            /* 扁平化设计：轻微背景和圆角 */
+            background-color: rgba(255, 255, 255, 0.7); /* 半透明白色背景 */
+            border-radius: 6px;             /* 小圆角 */
+            padding: 6px 10px;              /* 适度内边距 */
             
-            /* 文字阴影：确保在浅色地图背景下也能看清文字 */
-            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+            /* 文字阴影：确保在深色地图背景下也能看清文字 */
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
             
             /* 防止文字被选中 */
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            
+            /* 过渡效果 */
+            transition: all 0.2s ease;
+        }
+
+        /* 提示文字悬停效果（桌面端） */
+        @media (hover: hover) {
+            #instruction:hover {
+                background-color: rgba(255, 255, 255, 0.85); /* 悬停时背景更明显 */
+            }
         }
 
         /* ===== 5. 优化移动端弹窗样式 ===== */
@@ -113,9 +133,15 @@
             /* 屏幕宽度小于768px时应用以下样式 */
             #header {
                 font-size: 18px;            /* 移动端字体稍小 */
-                top: 15px;                  /* 离顶部稍近 */
-                padding: 8px 12px;          /* 减少内边距 */
-                transform: translateX(-50%) scaleX(1.2) skew(-5deg); /* 移动端减少拉伸效果 */
+                top: 20px;                  /* 离顶部稍远 */
+                padding: 12px 22px;         /* 稍小内边距 */
+                border-radius: 10px;        /* 稍小圆角 */
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* 移动端减少阴影 */
+                width: 90%;                 /* 移动端占屏幕宽度的90% */
+                max-width: 400px;           /* 最大宽度限制 */
+                white-space: normal;        /* 允许换行，适应小屏幕 */
+                text-align: center;
+                line-height: 1.4;           /* 增加行高，提高可读性 */
             }
             
             /* 移动端调整提示文字大小和位置 */
@@ -123,6 +149,9 @@
                 font-size: 13px;            /* 移动端稍小字体 */
                 bottom: 20px;               /* 距离底部稍近 */
                 left: 15px;                 /* 距离左边稍近 */
+                padding: 5px 8px;           /* 稍小内边距 */
+                border-radius: 5px;         /* 稍小圆角 */
+                background-color: rgba(255, 255, 255, 0.8); /* 移动端背景更明显 */
             }
             
             /* 移动端增大弹窗字体 */
@@ -162,6 +191,11 @@
             #instruction {
                 font-size: 14px;
             }
+            
+            /* 触摸设备上标题优化 */
+            #header {
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 触摸设备加深阴影 */
+            }
         }
         
         /* ===== 8. 小屏幕手机特殊优化 ===== */
@@ -169,25 +203,30 @@
             /* 针对小屏幕手机进一步优化 */
             #header {
                 font-size: 16px;            /* 进一步减小标题字体 */
-                top: 10px;                  /* 更靠近顶部 */
-                padding: 6px 10px;          /* 更小内边距 */
+                top: 15px;                  /* 更靠近顶部 */
+                padding: 10px 16px;         /* 更小内边距 */
+                border-radius: 8px;         /* 更小圆角 */
+                width: 92%;                 /* 占据更多宽度 */
+                letter-spacing: 1px;        /* 减少字间距 */
             }
             
             #instruction {
                 font-size: 12px;            /* 小屏幕提示文字更小 */
                 bottom: 15px;               /* 更靠近底部 */
                 left: 10px;                 /* 更靠近左边 */
+                padding: 4px 7px;           /* 更小内边距 */
+                border-radius: 4px;         /* 更小圆角 */
             }
         }
     </style>
 </head>
 <body>
-    <!-- 悬浮标题：无框、拉伸、倾斜设计 -->
+    <!-- 扁平化风格标题：深色背景，白色文字，圆角设计 -->
     <div id="header">
         坪山区电动车违法抓拍RFID设备点位
     </div>
     
-    <!-- 操作提示文字：左下角无框提示 -->
+    <!-- 操作提示文字：左下角半透明背景提示，无加粗效果 -->
     <div id="instruction">
         点击标色点位可查看点位信息
     </div>
@@ -415,9 +454,14 @@
         // 获取提示文字元素并调整其z-index，确保在地图控件上方
         window.addEventListener('load', function() {
             var instructionElement = document.getElementById('instruction');
+            var headerElement = document.getElementById('header');
             if (instructionElement) {
                 // 设置较高的z-index值，确保在Leaflet控件之上
                 instructionElement.style.zIndex = '1001';
+            }
+            if (headerElement) {
+                // 标题也设置较高z-index值
+                headerElement.style.zIndex = '1002';
             }
         });
     </script>
