@@ -112,7 +112,7 @@
         /* ===== 5. 自定义图标样式 ===== */
         /* 设置图标透明度为90%并添加阴影效果 */
         .custom-marker-icon {
-            opacity: 0.83 !important;       /* 90%不透明度，!important确保覆盖Leaflet默认样式 */
+            opacity: 0.78 !important;       /* 90%不透明度，!important确保覆盖Leaflet默认样式 */
             transition: all 0.2s ease;      /* 添加过渡效果 */
             
             /* 添加阴影效果：轻微阴影，使图标与地图背景区分开 */
@@ -125,7 +125,7 @@
         /* 桌面端图标悬停效果：轻微增加透明度和放大效果 */
         @media (hover: hover) {
             .custom-marker-icon:hover {
-                opacity: 0.9 !important;      /* 悬停时完全不透明 */
+                opacity: 0.85 !important;      /* 悬停时完全不透明 */
                 filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3)); /* 悬停时阴影加深 */
                 transform: scale(1.05);     /* 悬停时轻微放大 */
             }
@@ -565,5 +565,6 @@
     </script>
 </body>
 </html>
+
 
 
